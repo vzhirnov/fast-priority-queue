@@ -5,14 +5,23 @@
 int main()
 {
 
-    d_list<int> test;
-    test.add_front(3);
-//    test.add_front(2);
-//    test.add_front(1);
+    pr_arr_queue<int> test(100);
 
-    test.del_front();
-    std::cout << "first: " << test.get_first_item() << std::endl;
-    std::cout << "last: " << test.get_last_item() << std::endl;
+    test.add(0, 0);
+    test.add(1, 1);
+
+    test.add(99, 99);
+    test.add(99, 100);
+    test.add(99, 101);
+
+    std::cout << "size: " << test.size(99) << std::endl;
+    if (test.del(99)) {
+        test.del(100);
+        test.del(101);
+        std::cout << "deleted" << std::endl;
+    }
+    std::cout << "size: " << test.size(99) << std::endl;
+    std::cout << "show_first_val_with_pri: " << test.show_first_val_with_pri(99) << std::endl;
 
     return 0;
 }
