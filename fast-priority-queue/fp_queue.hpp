@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <iostream>
 #include <list>
 #include <memory>
 #include <numeric>
@@ -12,7 +13,7 @@ public:
     struct chunk {
         chunk()
         {
-            value = NULL;
+            value = {};
             next = nullptr;
             prev = nullptr;
         }
@@ -37,9 +38,7 @@ public:
 
          if(tail == head) {
              head->next = item;
-             tail = head->next;
-             tail->prev = head;
-             tail->next = nullptr;
+             tail = item;
          } else {
              head->next->prev = item;
              head->next = item;
@@ -60,40 +59,70 @@ public:
     {
         for(auto it = head->next; it; it = it->next) {
             if (it->value == t) {
-                it->prev->next = it->next;
-                if(it == tail) {
-                    tail = tail->prev;
-                    tail->next = nullptr;
+                if (it == tail) {
+                    std::cout << "del last element - " << it->value << std::endl;
+                    del_back();
+                    return true;
+                } else
+                if (it == head->next) {
+                    std::cout << "del first element - " << it->value << std::endl;
+                    del_front();
+                    return true;
+                } else
+                if (it->next == tail) {
+                    std::cout << "del prev last element - " << it->value << std::endl;
+                    it->prev->next = it->next;
+                    tail->prev = it->prev;
+                    count--;
+                    return true;
+                } else {
+                    std::cout << "del element in the middle - " << it->value << std::endl;
+                    it->prev->next = it->next;
+                    it->next->prev = it->prev;
+                    count--;
+                    return true;
                 }
-                count--;
-                return true;
             }
         }
-        return false;
-    }
+    return false;
+}
+
     void del_front()
     {
-        if (head == tail) {
+        if (!head->next) {
             return;
+        }
+        if (head->next == tail) {
+            tail = head;
+            tail->prev = nullptr;
+            tail->next = nullptr;
         } else {
-            if (head->next == tail) {
-                tail = head;
-            } else {
-                head->next = head->next->next;
-            }
+            head->next = head->next->next;
+            head->next->prev = head;
         }
         count--;
-
     }
     void del_back()
     {
-         tail = tail->prev;
-         tail->next = nullptr;
-         count--;
+        tail = tail->prev;
+        tail->next = nullptr;
+        count--;
+    }
+    void del_all_items()
+    {
+        auto item = head;
+        while(item = item->next) {
+            del_front();
+        }
     }
     T get_first_item()
     {
-        return head->next->value;
+        if (head->next) {
+            return head->next->value;
+        } else {
+            return {};
+        }
+
     }
     T get_last_item()
     {
@@ -102,6 +131,14 @@ public:
     size_t size()
     {
         return count;
+    }
+    void show_all()
+    {
+        std::cout << "current items:" << std::endl;
+        for(auto it = head->next; it; it = it->next) {
+            std::cout << it->value << " ";
+        }
+        std::cout << std::endl;
     }
 
 private:
@@ -145,6 +182,10 @@ public:
     size_t size(size_t pri)
     {
         return vect_[pri]->size();
+    }
+    void show_all()
+    {
+        vect_[vect_.size() - 1]->show_all();
     }
 public:
     std::vector<std::shared_ptr<dl_list<T1>>> vect_;
