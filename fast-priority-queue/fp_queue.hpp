@@ -25,7 +25,6 @@ public:
     dl_list() {
         // create head
         head = std::make_shared<chunk>();
-        head->next = nullptr;
         tail = head;
         count = 0;
     }
@@ -115,20 +114,46 @@ public:
             del_front();
         }
     }
-    T get_first_item()
+    void set_head(std::shared_ptr<chunk> new_head)
+    {
+        head = new_head;
+    }
+    void reset_head()
+    {
+        head->next = nullptr;
+        tail = head;
+    }
+
+    void set_tail(const std::shared_ptr<chunk> new_tail)
+    {
+        tail = new_tail;
+        tail->next = nullptr;
+    }
+    const T get_first_item() const
     {
         if (head->next) {
             return head->next->value;
         } else {
             return {};
         }
-
     }
-    T get_last_item()
+    const T get_last_item() const
     {
         return tail->value;
     }
-    size_t size()
+    const std::shared_ptr<chunk> get_head() const
+    {
+        return head;
+    }
+    const std::shared_ptr<chunk> get_first_chunk() const
+    {
+        return head->next;
+    }
+    const std::shared_ptr<chunk> get_tail() const
+    {
+        return tail;
+    }
+    const size_t size() const
     {
         return count;
     }
@@ -158,15 +183,15 @@ public:
             item = std::make_shared<dl_list<T1>>();
         }
     }
-    void add(size_t pri, T1 &&t1)
+    void add_front(size_t pri, T1 &&t1)
     {
         vect_[pri]->add_front(std::move(t1));
     }
-    void add(T1 &&t1)
+    void add_front(T1 &&t1)
     {
         vect_[vect_.size() - 1]->add_front(std::move(t1));
     }
-    bool del(T1 &&t1)
+    bool del_by_val(T1 &&t1)
     {
         for(auto &item : vect_) {
             if (item->del_first_item_by_val(std::move(t1))) {
@@ -174,6 +199,24 @@ public:
             }
         }
         return false;
+    }
+    void change_elem_pri(size_t old_pri, size_t new_pri)
+    {
+        return;
+    }
+    void change_all_elem_pri(size_t old_pri, size_t new_pri)
+    {
+        const std::shared_ptr<struct dl_list<T1>::chunk> old_p_fch = vect_[old_pri]->get_first_chunk();
+        if (old_p_fch) {
+            const std::shared_ptr<struct dl_list<T1>::chunk> new_p_t = vect_[new_pri]->get_tail();
+
+            new_p_t->next = old_p_fch;
+            vect_[new_pri]->set_tail(vect_[old_pri]->get_tail());
+            vect_[old_pri]->reset_head();
+        } else {
+            std::cout << "nothing to migrate" << std::endl;
+        }
+
     }
     T1 show_first_val_with_pri(size_t pri)
     {
@@ -184,6 +227,13 @@ public:
         return vect_[pri]->size();
     }
     void show_all()
+    {
+        for(auto &item : vect_) {
+            item->show_all();
+        }
+
+    }
+    void show_all_last_pri()
     {
         vect_[vect_.size() - 1]->show_all();
     }
